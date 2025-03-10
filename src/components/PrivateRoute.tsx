@@ -11,6 +11,15 @@ export const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     const checkAuth = async () => {
       try {
+        // First check for mock auth in development
+        const mockUser = localStorage.getItem("mockAuthUser");
+        if (mockUser) {
+          setIsAuthenticated(true);
+          setIsLoading(false);
+          return;
+        }
+
+        // Then check for real auth
         const { data: { session } } = await supabase.auth.getSession();
         setIsAuthenticated(!!session);
       } catch (error) {

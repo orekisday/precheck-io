@@ -11,6 +11,18 @@ export const Navigation = () => {
 
   const handleSignOut = async () => {
     try {
+      // Check if using mock auth in development
+      if (localStorage.getItem("mockAuthUser")) {
+        localStorage.removeItem("mockAuthUser");
+        toast({
+          title: "Signed out",
+          description: "You have been successfully signed out of dev mode.",
+        });
+        navigate("/login");
+        return;
+      }
+
+      // Real auth sign out
       await supabase.auth.signOut();
       toast({
         title: "Signed out",
