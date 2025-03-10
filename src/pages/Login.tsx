@@ -49,12 +49,12 @@ const Login = () => {
     setAuthError(null);
     
     try {
-      // Test connection to Supabase
-      const { error } = await supabase.from('_test_connection_').select('*').limit(1).maybeSingle();
+      // Test connection to Supabase by checking auth status
+      const { error: connectionError } = await supabase.auth.getSession();
       
-      if (error && error.message.includes('Failed to fetch')) {
+      if (connectionError) {
         setAuthError("Cannot connect to Supabase. Please check your network connection and Supabase configuration.");
-        console.error("Connection error:", error);
+        console.error("Connection error:", connectionError);
         setIsLoading(false);
         return;
       }
