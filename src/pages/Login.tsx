@@ -1,11 +1,11 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
-import { Stethoscope } from "lucide-react";
+import { Stethoscope, Mail, Lock } from "lucide-react";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -17,17 +17,16 @@ const Login = () => {
   const [errorMessage, setErrorMessage] = useState("");
 
   // Check if user is already logged in
-  const checkSession = async () => {
-    const { data } = await supabase.auth.getSession();
-    if (data.session) {
-      navigate("/");
-    }
-  };
-
-  // Call on component mount
-  useState(() => {
+  useEffect(() => {
+    const checkSession = async () => {
+      const { data } = await supabase.auth.getSession();
+      if (data.session) {
+        navigate("/");
+      }
+    };
+    
     checkSession();
-  }, []);
+  }, [navigate]);
 
   const handleAuthentication = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -99,29 +98,37 @@ const Login = () => {
             <label htmlFor="email" className="block text-sm font-medium mb-1">
               Email
             </label>
-            <Input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="you@example.com"
-              required
-            />
+            <div className="relative">
+              <Mail className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
+              <Input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@example.com"
+                className="pl-10"
+                required
+              />
+            </div>
           </div>
 
           <div>
             <label htmlFor="password" className="block text-sm font-medium mb-1">
               Password
             </label>
-            <Input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
-              required
-              minLength={6}
-            />
+            <div className="relative">
+              <Lock className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
+              <Input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                className="pl-10"
+                required
+                minLength={6}
+              />
+            </div>
           </div>
 
           {errorMessage && (
