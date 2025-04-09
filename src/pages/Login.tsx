@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
 import { AlertCircle, Loader2 } from "lucide-react";
+import VersionInfo from "@/components/VersionInfo";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -89,7 +90,10 @@ const Login = () => {
 
   return (
     <div className="container max-w-md mx-auto mt-12 p-4">
-      <h1 className="text-2xl font-bold mb-8 text-center">Welcome to PreCheck.io</h1>
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-2xl font-bold text-center flex-1">Welcome to PreCheck.io</h1>
+        <VersionInfo />
+      </div>
       <div className="bg-card p-6 rounded-lg shadow-lg">
         {authError && (
           <div className="bg-destructive/10 text-destructive p-3 rounded-md mb-4 flex items-start">
