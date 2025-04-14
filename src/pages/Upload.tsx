@@ -6,18 +6,18 @@ import { ResultsPanel } from "@/components/ResultsPanel";
 const Upload = () => {
   const [showResults, setShowResults] = useState(false);
   const [isHealthy, setIsHealthy] = useState(false);
-  const [analyzedFile, setAnalyzedFile] = useState<string | null>(null);
+  const [analyzedFiles, setAnalyzedFiles] = useState<string[]>([]);
 
   const handleReset = () => {
     setShowResults(false);
-    setAnalyzedFile(null);
+    setAnalyzedFiles([]);
   };
 
-  const handleAnalysis = (fileName: string) => {
-    // Simulate analysis result - randomly determine if healthy
+  const handleAnalysis = (fileNames: string[]) => {
+    // Simulate overall analysis result - randomly determine if healthy
     const result = Math.random() > 0.5;
     setIsHealthy(result);
-    setAnalyzedFile(fileName);
+    setAnalyzedFiles(fileNames);
     setShowResults(true);
   };
 
