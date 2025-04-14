@@ -5,8 +5,13 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { AnalysisDialog } from "./AnalysisDialog";
 
+interface FileResult {
+  fileName: string;
+  isHealthy: boolean;
+}
+
 interface UploadAreaProps {
-  onAnalyze: (fileNames: string[]) => void;
+  onAnalyze: (fileNames: string[], results: FileResult[]) => void;
 }
 
 export const UploadArea = ({ onAnalyze }: UploadAreaProps) => {
@@ -46,10 +51,10 @@ export const UploadArea = ({ onAnalyze }: UploadAreaProps) => {
     }
   };
 
-  const handleConfirmAnalysis = () => {
+  const handleConfirmAnalysis = (results: FileResult[]) => {
     setShowDialog(false);
     if (files.length > 0) {
-      onAnalyze(files.map(file => file.name));
+      onAnalyze(files.map(file => file.name), results);
     }
   };
 

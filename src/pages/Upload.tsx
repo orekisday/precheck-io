@@ -3,6 +3,11 @@ import { useState } from "react";
 import { UploadArea } from "@/components/UploadArea";
 import { ResultsPanel } from "@/components/ResultsPanel";
 
+interface FileResult {
+  fileName: string;
+  isHealthy: boolean;
+}
+
 const Upload = () => {
   const [showResults, setShowResults] = useState(false);
   const [isHealthy, setIsHealthy] = useState(false);
@@ -13,10 +18,10 @@ const Upload = () => {
     setAnalyzedFiles([]);
   };
 
-  const handleAnalysis = (fileNames: string[]) => {
-    // Simulate overall analysis result - randomly determine if healthy
-    const result = Math.random() > 0.5;
-    setIsHealthy(result);
+  const handleAnalysis = (fileNames: string[], results: FileResult[]) => {
+    // Determine overall result - if at least one file is unhealthy, the overall result is unhealthy
+    const overallResult = !results.some(result => !result.isHealthy);
+    setIsHealthy(overallResult);
     setAnalyzedFiles(fileNames);
     setShowResults(true);
   };

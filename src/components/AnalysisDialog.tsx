@@ -8,7 +8,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, XCircle } from "lucide-react";
+import { CheckCircle, XCircle, Download } from "lucide-react";
 
 interface FileResult {
   fileName: string;
@@ -19,7 +19,7 @@ interface AnalysisDialogProps {
   isOpen: boolean;
   onClose: () => void;
   fileNames: string[];
-  onConfirm: () => void;
+  onConfirm: (results: FileResult[]) => void;
 }
 
 export const AnalysisDialog = ({
@@ -33,6 +33,31 @@ export const AnalysisDialog = ({
     fileName,
     isHealthy: Math.random() > 0.5, // Random result
   }));
+
+  const handleDownload = () => {
+    // Create content for the text file
+    const content = fileResults.map(result => 
+      `${result.fileName}: ${result.isHealthy ? 'Healthy - No abnormalities detected' : 'Unhealthy - Abnormalities detected'}`
+    ).join('\n');
+    
+    // Create a blob with the content
+    const blob = new Blob([content], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    
+    // Create a link and trigger the download
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'analysis-results.txt';
+    document.body.appendChild(a);
+    a.click();
+    
+    // Clean up
+    URL.revokeObjectURL(url);
+    document.body.removeChild(a);
+    
+    // Pass results to parent component
+    onConfirm(fileResults);
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -76,8 +101,9 @@ export const AnalysisDialog = ({
           <Button variant="outline" onClick={onClose}>
             Close
           </Button>
-          <Button onClick={onConfirm}>
-            Save Results
+          <Button onClick={handleDownload} className="gap-2">
+            <Download className="h-4 w-4" />
+            Download Results
           </Button>
         </DialogFooter>
       </DialogContent>
