@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { Upload } from "lucide-react";
+import { Upload, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { AnalysisDialog } from "./AnalysisDialog";
