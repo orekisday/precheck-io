@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { UploadArea } from "@/components/UploadArea";
 import { ResultsPanel } from "@/components/ResultsPanel";
@@ -5,9 +6,19 @@ import { ResultsPanel } from "@/components/ResultsPanel";
 const Upload = () => {
   const [showResults, setShowResults] = useState(false);
   const [isHealthy, setIsHealthy] = useState(false);
+  const [analyzedFile, setAnalyzedFile] = useState<string | null>(null);
 
   const handleReset = () => {
     setShowResults(false);
+    setAnalyzedFile(null);
+  };
+
+  const handleAnalysis = (fileName: string) => {
+    // Simulate analysis result - randomly determine if healthy
+    const result = Math.random() > 0.5;
+    setIsHealthy(result);
+    setAnalyzedFile(fileName);
+    setShowResults(true);
   };
 
   return (
@@ -17,7 +28,7 @@ const Upload = () => {
         {showResults ? (
           <ResultsPanel isHealthy={isHealthy} onReset={handleReset} />
         ) : (
-          <UploadArea />
+          <UploadArea onAnalyze={handleAnalysis} />
         )}
       </div>
     </div>
