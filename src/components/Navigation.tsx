@@ -1,6 +1,7 @@
+
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Stethoscope, LogOut } from "lucide-react";
+import { Stethoscope, LogOut, Info } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 
@@ -27,6 +28,12 @@ export const Navigation = () => {
         <div className="flex items-center space-x-4">
           <Button variant="ghost" asChild>
             <Link to="/upload">Upload Scan</Link>
+          </Button>
+          <Button variant="ghost" asChild>
+            <Link to="/about">
+              <Info className="mr-2 h-4 w-4" />
+              About
+            </Link>
           </Button>
           <Button onClick={handleSignOut}>
             <LogOut className="mr-2 h-4 w-4" />
