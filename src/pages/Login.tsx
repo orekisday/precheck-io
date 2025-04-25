@@ -5,13 +5,15 @@ import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, Info } from "lucide-react";
 import VersionInfo from "@/components/VersionInfo";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 
 const Login = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [authError, setAuthError] = useState<string | null>(null);
+  const [connectionError, setConnectionError] = useState<boolean>(false);
 
   useEffect(() => {
     // Listen for auth state changes
@@ -51,7 +53,17 @@ const Login = () => {
         <VersionInfo />
       </div>
       <div className="bg-card p-6 rounded-lg shadow-lg">
-        {authError && (
+        {connectionError && (
+          <Alert variant="destructive" className="mb-4">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Connection Error</AlertTitle>
+            <AlertDescription>
+              Unable to connect to authentication service. This may be due to network issues or the service being temporarily unavailable. Please try again later.
+            </AlertDescription>
+          </Alert>
+        )}
+        
+        {authError && !connectionError && (
           <div className="bg-destructive/10 text-destructive p-3 rounded-md mb-4 flex items-start">
             <AlertCircle className="h-5 w-5 mr-2 mt-0.5 flex-shrink-0" />
             <div>
@@ -67,7 +79,26 @@ const Login = () => {
           theme="light"
           providers={[]}
           redirectTo={window.location.origin}
+          onError={(error) => {
+            console.error("Auth error:", error);
+            if (error.message.includes("Failed to fetch")) {
+              setConnectionError(true);
+              setAuthError(null);
+            } else {
+              setAuthError(error.message);
+              setConnectionError(false);
+            }
+          }}
         />
+
+        <div className="mt-4 pt-4 border-t border-muted">
+          <Alert variant="default" className="bg-muted/50">
+            <Info className="h-4 w-4" />
+            <AlertDescription className="text-xs text-muted-foreground">
+              If you're experiencing connection issues, please make sure your network connection is stable and try again later.
+            </AlertDescription>
+          </Alert>
+        </div>
       </div>
     </div>
   );

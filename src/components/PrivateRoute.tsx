@@ -10,27 +10,42 @@ export const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
   const location = useLocation();
 
   useEffect(() => {
+    let mounted = true;
+    
     const checkAuth = async () => {
       try {
-        const { data: { session } } = await supabase.auth.getSession();
-        setIsAuthenticated(!!session);
+        const { data: { session }, error } = await supabase.auth.getSession();
+        if (mounted) {
+          setIsAuthenticated(!!session);
+          setIsLoading(false);
+        }
+        if (error) {
+          console.error("Auth check error:", error);
+        }
       } catch (error) {
         console.error("Error checking authentication:", error);
-        setIsAuthenticated(false);
-      } finally {
-        setIsLoading(false);
+        if (mounted) {
+          setIsAuthenticated(false);
+          setIsLoading(false);
+        }
       }
     };
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
-        setIsAuthenticated(!!session);
-        setIsLoading(false);
+        if (mounted) {
+          setIsAuthenticated(!!session);
+          setIsLoading(false);
+        }
       }
     );
 
     checkAuth();
-    return () => subscription.unsubscribe();
+    
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   if (isLoading) {
