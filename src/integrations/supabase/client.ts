@@ -17,10 +17,12 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
     detectSessionInUrl: true
   },
   global: {
-    fetch: (...args) => fetch(...args).catch(err => {
-      console.error('Supabase fetch error:', err);
-      throw err;
-    })
+    fetch: function customFetch(...args) {
+      return fetch(...args).catch(err => {
+        console.error('Supabase fetch error:', err);
+        throw err;
+      });
+    }
   },
   // Add reasonable timeouts
   realtime: {

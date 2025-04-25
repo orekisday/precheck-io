@@ -46,6 +46,51 @@ const Login = () => {
     return () => subscription.unsubscribe();
   }, [navigate, toast]);
 
+  // Monitor connection errors from Supabase
+  useEffect(() => {
+    const handleConnectionErrors = () => {
+      const testConnection = async () => {
+        try {
+          // Simple ping to Supabase to check connection
+          await fetch(SUPABASE_URL, { 
+            method: 'HEAD', 
+            mode: 'no-cors',
+            cache: 'no-store'
+          });
+          setConnectionError(false);
+        } catch (error) {
+          console.error("Connection test failed:", error);
+          setConnectionError(true);
+        }
+      };
+      
+      testConnection();
+      
+      // Setup event listeners for online/offline events
+      window.addEventListener('online', () => setConnectionError(false));
+      window.addEventListener('offline', () => setConnectionError(true));
+      
+      return () => {
+        window.removeEventListener('online', () => setConnectionError(false));
+        window.removeEventListener('offline', () => setConnectionError(true));
+      };
+    };
+    
+    handleConnectionErrors();
+  }, []);
+
+  // Custom error handler for Auth UI errors
+  const handleAuthError = (error: Error) => {
+    console.error("Auth error:", error);
+    if (error.message.includes("Failed to fetch") || error.message.includes("Network") || error.message.includes("offline")) {
+      setConnectionError(true);
+      setAuthError(null);
+    } else {
+      setAuthError(error.message);
+      setConnectionError(false);
+    }
+  };
+
   return (
     <div className="container max-w-md mx-auto mt-12 p-4">
       <div className="flex justify-between items-center mb-8">
@@ -79,16 +124,6 @@ const Login = () => {
           theme="light"
           providers={[]}
           redirectTo={window.location.origin}
-          onError={(error) => {
-            console.error("Auth error:", error);
-            if (error.message.includes("Failed to fetch")) {
-              setConnectionError(true);
-              setAuthError(null);
-            } else {
-              setAuthError(error.message);
-              setConnectionError(false);
-            }
-          }}
         />
 
         <div className="mt-4 pt-4 border-t border-muted">
