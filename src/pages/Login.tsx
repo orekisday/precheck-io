@@ -14,10 +14,37 @@ const Login = () => {
   const { toast } = useToast();
   const [authError, setAuthError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [connectionStatus, setConnectionStatus] = useState<'checking' | 'success' | 'error'>('checking');
 
   useEffect(() => {
+    // First check if we can connect to Supabase
+    const checkConnection = async () => {
+      try {
+        setConnectionStatus('checking');
+        const { error } = await supabase.from('profiles').select('count', { count: 'exact', head: true });
+        
+        if (error && error.code === 'PGRST116') {
+          // This is actually a success case - the error just means we don't have permission, but connection works
+          setConnectionStatus('success');
+        } else if (error) {
+          console.error('Connection test error:', error);
+          setConnectionStatus('error');
+          setAuthError('Cannot connect to Supabase. Please check your network connection.');
+        } else {
+          setConnectionStatus('success');
+        }
+      } catch (error) {
+        console.error('Unexpected connection error:', error);
+        setConnectionStatus('error');
+        setAuthError('Failed to connect to authentication service.');
+      }
+    };
+
+    checkConnection();
+
+    // Listen for auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      (event, session) => {
         if (event === "SIGNED_IN") {
           toast({
             title: "Welcome!",
@@ -37,7 +64,6 @@ const Login = () => {
         }
       } catch (error) {
         console.error("Error checking session:", error);
-        setAuthError("Error connecting to authentication service");
       }
     };
 
@@ -91,20 +117,30 @@ const Login = () => {
   return (
     <div className="container max-w-md mx-auto mt-12 p-4">
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-2xl font-bold text-center flex-1">Welcome to PreCheck.io</h1>
+        <h1 className="text-2xl font-bold text-center flex-1">Welcome to LungScan AI</h1>
         <VersionInfo />
       </div>
       <div className="bg-card p-6 rounded-lg shadow-lg">
-        {authError && (
+        {connectionStatus === 'error' && (
           <div className="bg-destructive/10 text-destructive p-3 rounded-md mb-4 flex items-start">
             <AlertCircle className="h-5 w-5 mr-2 mt-0.5 flex-shrink-0" />
             <div>
               <p className="font-medium">Connection Error</p>
-              <p className="text-sm">{authError}</p>
+              <p className="text-sm">Unable to connect to Supabase authentication service.</p>
               <p className="text-xs mt-1">
-                Check that your Supabase project is properly configured and that you have
-                set the correct URL and API key in <code className="bg-muted px-1 rounded">src/integrations/supabase/client.ts</code>
+                This could be due to network issues or Supabase project configuration. Please try again later or check your
+                Supabase project settings.
               </p>
+            </div>
+          </div>
+        )}
+        
+        {authError && (
+          <div className="bg-destructive/10 text-destructive p-3 rounded-md mb-4 flex items-start">
+            <AlertCircle className="h-5 w-5 mr-2 mt-0.5 flex-shrink-0" />
+            <div>
+              <p className="font-medium">Authentication Error</p>
+              <p className="text-sm">{authError}</p>
             </div>
           </div>
         )}
@@ -113,25 +149,32 @@ const Login = () => {
           onClick={handleTestSignIn} 
           variant="outline" 
           className="w-full mb-4" 
-          disabled={isLoading}
+          disabled={isLoading || connectionStatus === 'checking'}
         >
           {isLoading ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               Testing connection...
             </>
+          ) : connectionStatus === 'checking' ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Checking connection...
+            </>
           ) : (
             "Test Supabase Connection"
           )}
         </Button>
         
-        <Auth
-          supabaseClient={supabase}
-          appearance={{ theme: ThemeSupa }}
-          theme="light"
-          providers={[]}
-          redirectTo={window.location.origin}
-        />
+        {connectionStatus !== 'error' && (
+          <Auth
+            supabaseClient={supabase}
+            appearance={{ theme: ThemeSupa }}
+            theme="light"
+            providers={[]}
+            redirectTo={window.location.origin}
+          />
+        )}
       </div>
     </div>
   );
