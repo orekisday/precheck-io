@@ -5,20 +5,19 @@ import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
-import { AlertCircle, Info } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { AlertCircle, Loader2 } from "lucide-react";
 import VersionInfo from "@/components/VersionInfo";
-import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 
 const Login = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [authError, setAuthError] = useState<string | null>(null);
-  const [connectionError, setConnectionError] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    // Listen for auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
+      async (event, session) => {
         if (event === "SIGNED_IN") {
           toast({
             title: "Welcome!",
@@ -38,7 +37,7 @@ const Login = () => {
         }
       } catch (error) {
         console.error("Error checking session:", error);
-        setAuthError("Unable to check authentication status. Please try again.");
+        setAuthError("Error connecting to authentication service");
       }
     };
 
@@ -46,77 +45,85 @@ const Login = () => {
     return () => subscription.unsubscribe();
   }, [navigate, toast]);
 
-  // Monitor connection errors from Supabase
-  useEffect(() => {
-    const handleConnectionErrors = () => {
-      const testConnection = async () => {
-        try {
-          // Simple ping to Supabase to check connection
-          await fetch(SUPABASE_URL, { 
-            method: 'HEAD', 
-            mode: 'no-cors',
-            cache: 'no-store'
-          });
-          setConnectionError(false);
-        } catch (error) {
-          console.error("Connection test failed:", error);
-          setConnectionError(true);
-        }
-      };
-      
-      testConnection();
-      
-      // Setup event listeners for online/offline events
-      window.addEventListener('online', () => setConnectionError(false));
-      window.addEventListener('offline', () => setConnectionError(true));
-      
-      return () => {
-        window.removeEventListener('online', () => setConnectionError(false));
-        window.removeEventListener('offline', () => setConnectionError(true));
-      };
-    };
+  const handleTestSignIn = async () => {
+    setIsLoading(true);
+    setAuthError(null);
     
-    handleConnectionErrors();
-  }, []);
-
-  // Custom error handler for Auth UI errors
-  const handleAuthError = (error: Error) => {
-    console.error("Auth error:", error);
-    if (error.message.includes("Failed to fetch") || error.message.includes("Network") || error.message.includes("offline")) {
-      setConnectionError(true);
-      setAuthError(null);
-    } else {
-      setAuthError(error.message);
-      setConnectionError(false);
+    try {
+      // Test connection to Supabase by checking auth status
+      const { error: connectionError } = await supabase.auth.getSession();
+      
+      if (connectionError) {
+        setAuthError("Cannot connect to Supabase. Please check your network connection and Supabase configuration.");
+        console.error("Connection error:", connectionError);
+        setIsLoading(false);
+        return;
+      }
+      
+      // Try sign in with test account
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: "test@example.com",
+        password: "password123",
+      });
+      
+      if (signInError) {
+        if (signInError.message.includes('Failed to fetch')) {
+          setAuthError("Network error when connecting to authentication service. Please check your internet connection.");
+        } else if (signInError.message.includes('Invalid login credentials')) {
+          setAuthError("Test account not found. This is expected in a new project.");
+          toast({
+            title: "Test account not found",
+            description: "This is normal. Please use the sign-up form to create a new account.",
+          });
+        } else {
+          setAuthError(`Authentication error: ${signInError.message}`);
+        }
+        console.error("Sign in error:", signInError);
+      }
+    } catch (error) {
+      console.error("Unexpected error:", error);
+      setAuthError("An unexpected error occurred. Please check console for details.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
     <div className="container max-w-md mx-auto mt-12 p-4">
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-2xl font-bold text-center flex-1">Welcome to LungScan AI</h1>
+        <h1 className="text-2xl font-bold text-center flex-1">Welcome to PreCheck.io</h1>
         <VersionInfo />
       </div>
       <div className="bg-card p-6 rounded-lg shadow-lg">
-        {connectionError && (
-          <Alert variant="destructive" className="mb-4">
-            <AlertCircle className="h-4 w-4" />
-            <AlertTitle>Connection Error</AlertTitle>
-            <AlertDescription>
-              Unable to connect to authentication service. This may be due to network issues or the service being temporarily unavailable. Please try again later.
-            </AlertDescription>
-          </Alert>
-        )}
-        
-        {authError && !connectionError && (
+        {authError && (
           <div className="bg-destructive/10 text-destructive p-3 rounded-md mb-4 flex items-start">
             <AlertCircle className="h-5 w-5 mr-2 mt-0.5 flex-shrink-0" />
             <div>
-              <p className="font-medium">Authentication Error</p>
+              <p className="font-medium">Connection Error</p>
               <p className="text-sm">{authError}</p>
+              <p className="text-xs mt-1">
+                Check that your Supabase project is properly configured and that you have
+                set the correct URL and API key in <code className="bg-muted px-1 rounded">src/integrations/supabase/client.ts</code>
+              </p>
             </div>
           </div>
         )}
+        
+        <Button 
+          onClick={handleTestSignIn} 
+          variant="outline" 
+          className="w-full mb-4" 
+          disabled={isLoading}
+        >
+          {isLoading ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Testing connection...
+            </>
+          ) : (
+            "Test Supabase Connection"
+          )}
+        </Button>
         
         <Auth
           supabaseClient={supabase}
@@ -125,15 +132,6 @@ const Login = () => {
           providers={[]}
           redirectTo={window.location.origin}
         />
-
-        <div className="mt-4 pt-4 border-t border-muted">
-          <Alert variant="default" className="bg-muted/50">
-            <Info className="h-4 w-4" />
-            <AlertDescription className="text-xs text-muted-foreground">
-              If you're experiencing connection issues, please make sure your network connection is stable and try again later.
-            </AlertDescription>
-          </Alert>
-        </div>
       </div>
     </div>
   );

@@ -1,4 +1,3 @@
-
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Stethoscope, Upload, CheckCircle, Shield } from "lucide-react";
@@ -15,7 +14,8 @@ const Index = () => {
             AI-Powered Lung Health Analysis
           </h1>
           <p className="text-xl text-gray-600 mb-8">
-            Advanced AI technology for rapid analysis of lung fluorography scans, supporting healthcare professionals in early detection and diagnosis.
+            Quick, accurate analysis of your lung fluorography scans using advanced
+            AI technology.
           </p>
           <Button size="lg" asChild className="animate-fadeIn">
             <Link to="/upload">Start Analysis</Link>
@@ -25,23 +25,23 @@ const Index = () => {
         <div className="grid md:grid-cols-3 gap-8 mt-16">
           <div className="bg-white p-6 rounded-lg shadow-sm">
             <Upload className="h-8 w-8 text-primary mb-4" />
-            <h3 className="text-xl font-semibold mb-2">Simple Upload</h3>
+            <h3 className="text-xl font-semibold mb-2">Easy Upload</h3>
             <p className="text-gray-600">
-              Securely upload your lung fluorography scans for immediate AI analysis.
+              Simply upload your fluorography scan and get instant results.
             </p>
           </div>
           <div className="bg-white p-6 rounded-lg shadow-sm">
             <CheckCircle className="h-8 w-8 text-primary mb-4" />
-            <h3 className="text-xl font-semibold mb-2">Rapid Results</h3>
+            <h3 className="text-xl font-semibold mb-2">Quick Results</h3>
             <p className="text-gray-600">
-              Receive detailed analysis results within seconds to support clinical decision-making.
+              Receive clear, easy-to-understand analysis within seconds.
             </p>
           </div>
           <div className="bg-white p-6 rounded-lg shadow-sm">
             <Shield className="h-8 w-8 text-primary mb-4" />
-            <h3 className="text-xl font-semibold mb-2">HIPAA Compliant</h3>
+            <h3 className="text-xl font-semibold mb-2">Secure & Private</h3>
             <p className="text-gray-600">
-              Your medical data is protected with enterprise-grade security and full HIPAA compliance.
+              Your health data is protected with enterprise-grade security.
             </p>
           </div>
         </div>
