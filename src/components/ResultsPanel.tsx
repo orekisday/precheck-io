@@ -1,3 +1,4 @@
+
 import { CheckCircle, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -12,21 +13,21 @@ export const ResultsPanel = ({ isHealthy, onReset }: ResultsPanelProps) => {
       {isHealthy ? (
         <div className="text-success">
           <CheckCircle className="w-16 h-16 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold mb-2">Healthy</h2>
+          <h2 className="text-2xl font-bold mb-2">No Abnormalities Detected</h2>
           <p className="text-gray-600 mb-4">
-            Your scan shows no signs of concern.
+            Our AI analysis indicates no significant abnormalities in the lung scan. As always, please consult with a healthcare professional for a complete diagnosis.
           </p>
         </div>
       ) : (
         <div className="text-destructive">
           <XCircle className="w-16 h-16 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold mb-2">Requires Attention</h2>
+          <h2 className="text-2xl font-bold mb-2">Potential Abnormalities Detected</h2>
           <p className="text-gray-600 mb-4">
-            Please consult with a healthcare professional.
+            Our AI analysis has detected potential abnormalities that require professional medical review. Please consult with a healthcare provider for proper evaluation and diagnosis.
           </p>
         </div>
       )}
-      <Button onClick={onReset}>Upload Another Scan</Button>
+      <Button onClick={onReset}>Analyze Another Scan</Button>
     </div>
   );
 };

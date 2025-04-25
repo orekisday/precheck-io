@@ -23,7 +23,7 @@ export const Navigation = () => {
       <div className="container mx-auto px-4 py-4 flex items-center justify-between">
         <Link to="/" className="flex items-center space-x-2">
           <Stethoscope className="h-6 w-6 text-primary" />
-          <span className="text-xl font-semibold">PreCheck.io</span>
+          <span className="text-xl font-semibold">LungScan AI</span>
         </Link>
         <div className="flex items-center space-x-4">
           <Button variant="ghost" asChild>
@@ -31,7 +31,7 @@ export const Navigation = () => {
           </Button>
           <Button variant="ghost" asChild>
             <Link to="/about">
-              <Info className="mr-2 h-4 w-4" />
+              <Info className="h-4 w-4" />
               About
             </Link>
           </Button>
